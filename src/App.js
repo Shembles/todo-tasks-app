@@ -4,7 +4,6 @@ import './App.css';
 class App extends Component {
   constructor(props) {
     super(props);
-    this.states = {val: ' '};
     this.handleClick = this.handleClick.bind(this);
     this.handleClicks = this.handleClicks.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -37,7 +36,9 @@ class App extends Component {
        }
       ],
       completedTasks: [],
-      draggedTask: {}
+      draggedTask: {},
+      editItem: false,
+      val: ' '
     }
   }
 
@@ -47,6 +48,12 @@ class App extends Component {
       draggedTask: todo
     });
   }
+  // onDrag = (event, task) => {
+  //   event.preventDefault();
+  //   this.setState({
+  //     draggedTask: task
+  //   });
+  // }
 
   onDragOver = (event) => {
     event.preventDefault();
@@ -59,7 +66,16 @@ class App extends Component {
       todos: todos.filter(task => task.taskID !== draggedTask.taskID),
       draggedTask: {},
     })
+    console.log(todos)
   }
+  // onDrop = (event ) => {
+  //   const { completedTasks, draggedTask, todos } = this.state;
+  //   this.setState({
+  //     // todos: [...todos, draggedTask],
+  //     // completedTasks: completedTasks.filter(task => task.taskID !== draggedTask.taskID),
+  //     draggedTask: {},
+  //   })
+  // }
 
   handleClick = (id) => {
     console.log(id)
@@ -77,28 +93,56 @@ class App extends Component {
     this.setState({val: event.target.value})
   }
 
-  handleSubmit(event) {
-    console.log(event)
-    event.preventDefault();
-    const newT = event.target.value
-    const id = Math.floor(Math.random() * 10000) + 1
-    const newTask = {id, newT }
+  handleEdit = (id) => {
+    const filteredItems =  this.state.todos.filter((todo) => todo.taskID !== id)
+    const selectedItem = this.state.todos.find((todo) => todo.taskID === id)
+    this.setState({
+      todos: filteredItems,
+      val: selectedItem.task,
+      taskID: id,
+    })
+    console.log("temp >>",selectedItem.task)
+  }
 
-    this.setState([newT, newTask])
-    
+  handleSubmit(event) {
+    if (this.state.val === '') {
+      alert("Please insert a task")
+    } 
+    console.log("temp >>",this.state.val)
+    if (this._inputElement.value !== "") {
+      var newItem = {
+        task: this._inputElement.value,
+        taskID: Math.floor(Math.random() * 10000) + 1
+      }
+      this.setState((prevState) => {
+        return {
+          todos: prevState.todos.concat(newItem)
+        }
+      })
+      this._inputElement.value = ""
+    }
+    this.setState({
+      val: ''
+    })
+    console.log(this.state.todos)
+    event.preventDefault()
   }
 
   render() {
     const { todos, completedTasks} = this.state;
-    console.log(this.states.val)
+    console.log(this.state.val)
     return (
       <div className="App">
         <form onSubmit={this.handleSubmit}>
-          <input type="text" defaultValue={this.states.val} onChange={this.handleChange} />
+          <input ref={(a) => this._inputElement = a} type="text" value={this.state.val}  onChange={this.handleChange} />
           <button type="submit">Add Task</button>
         </form>
       <div className="container">
-        <div className="todos">
+        <div 
+            // onDrop={event => this.onDrop(event)}
+            // onDragOver={(event => this.onDragOver(event))}
+            className="todos"
+        >
         <h3 style={{backgroundColor: "gray", marginTop: 0}}>Current Tasks</h3>
           <h3>
             {
@@ -108,7 +152,7 @@ class App extends Component {
                   draggable
                   onDrag={(event) => this.onDrag(event, todo)}
                   >
-                  <div>{todo.task} <span onClick={() => {this.handleClick(todo.taskID)}} style={{ color: "red", fontSize: 14, float: "right", marginRight: 10 }}>x</span> </div>
+                  <div>{todo.task} <span id="add" onClick={() => {this.handleEdit(todo.taskID)}} style={{ color: "green", fontSize: 14, float: "right", marginRight: 10 }}>+</span> <span onClick={() => {this.handleClick(todo.taskID)}} style={{ color: "red", fontSize: 14, float: "right", marginRight: 10 }}>x</span> </div>
                 </div>
               )
             }
@@ -125,8 +169,9 @@ class App extends Component {
               <div
                 key={task.taskID}
                 draggable
+                onDrag={(event) => this.onDrag(event, task)}
               >
-                <div>{task.task} <span onClick={() => {this.handleClicks(task.taskID)}} style={{ color: "red", fontSize: 12, float: "right", marginRight: 10 }}>x</span> </div>
+                <div>{task.task} <span id="add" onClick={() => {this.handleEdit(task.taskID)}} style={{ color: "green", fontSize: 14, float: "right", marginRight: 10 }}>+</span> <span onClick={() => {this.handleClicks(task.taskID)}} style={{ color: "red", fontSize: 12, float: "right", marginRight: 10 }}>x</span> </div>
               </div>
             )}
           </h3>

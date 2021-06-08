@@ -27,3 +27,11 @@
   height: 10px;
   padding-bottom: 5px;
 }
+
+.container #add {
+  border: 1px solid green;
+  border-radius: 50%;
+  width: 14px;
+  height: 10px;
+  padding-bottom: 5px;
+}
